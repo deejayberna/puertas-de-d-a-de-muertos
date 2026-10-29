@@ -6,13 +6,6 @@
     }
   },
   "rewrites": [
-    {
-      "source": "/static/:path*",
-      "destination": "/public/:path*"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/api/index.js"
-    }
+    { "source": "/(.*)", "destination": "/api/index.js" }
   ]
 }

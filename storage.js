@@ -9,7 +9,9 @@ const path = require('path');
 const crypto = require('crypto');
 
 const ROOT = __dirname;
-const DATA_DIR = path.join(ROOT, 'data');
+// En Vercel el disco es de solo lectura: si no hay Redis, usa /tmp (temporal, se borra).
+const ON_VERCEL = Boolean(process.env.VERCEL);
+const DATA_DIR = ON_VERCEL ? path.join(require('os').tmpdir(), 'pdm-data') : path.join(ROOT, 'data');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
 
 const DEFAULT_SETTINGS = { votingOpen: true, showResults: true, closesAt: null, strictMode: true };
@@ -50,10 +52,13 @@ function saveDb(db) {
     fs.writeFileSync(tmp, json);
     fs.renameSync(tmp, DB_FILE);
   } catch {
-    fs.writeFileSync(DB_FILE, json);
+    try { fs.writeFileSync(DB_FILE, json); } catch (e) { console.error('No se pudo guardar db.json:', e.message); }
   }
 }
 
+if (!isRedis && ON_VERCEL) {
+  console.warn('⚠ Vercel sin Upstash Redis: los datos se guardan en /tmp y se BORRARÁN. Conecta Upstash Redis en Storage.');
+}
 if (!isRedis && !fs.existsSync(DB_FILE)) {
   saveDb({ settings: { ...DEFAULT_SETTINGS }, doors: [], votes: [] });
 }
@@ -362,3 +367,4 @@ module.exports = {
   recordVote,
   resetVotes
 };
+

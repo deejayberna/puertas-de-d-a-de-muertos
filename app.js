@@ -11,8 +11,10 @@ const QRCode = require('qrcode');
 const storage = require('./storage');
 
 const ROOT = __dirname;
-const DATA_DIR = path.join(ROOT, 'data');
-const UPLOAD_DIR = path.join(ROOT, 'uploads');
+const ON_VERCEL = Boolean(process.env.VERCEL);
+const TMP = require('os').tmpdir();
+const DATA_DIR = ON_VERCEL ? path.join(TMP, 'pdm-data') : path.join(ROOT, 'data');
+const UPLOAD_DIR = ON_VERCEL ? path.join(TMP, 'pdm-uploads') : path.join(ROOT, 'uploads');
 const PUBLIC_DIR = path.join(ROOT, 'public');
 const SECRET_FILE = path.join(DATA_DIR, 'secret.key');
 
@@ -600,3 +602,4 @@ module.exports = {
   DEFAULT_PASSWORD,
   ADMIN_PASSWORD
 };
+
