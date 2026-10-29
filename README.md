@@ -36,6 +36,28 @@ App web para votar por la puerta favorita del concurso. Un solo voto por disposi
 
 Ningún sistema web sin cuentas es 100 % infalible (alguien con dos navegadores distintos y mucha paciencia podría intentarlo), pero esto frena al 99 % de los intentos.
 
+## Desplegar en Vercel
+
+La aplicación está lista para ejecutarse en la arquitectura serverless de Vercel utilizando Upstash Redis para la base de datos y Vercel Blob para las imágenes:
+
+1. **Importar el repositorio en Vercel**:
+   - Conecta tu cuenta de GitHub y selecciona el repositorio `puertas-de-d-a-de-muertos`.
+   - Vercel detectará la configuración automáticamente a través de `vercel.json`.
+
+2. **Conectar Servicios de Storage (desde el Dashboard del proyecto en Vercel)**:
+   - Ve a la pestaña **Storage** de tu proyecto.
+   - Conecta **Upstash Redis** (Marketplace): esto inyectará automáticamente `UPSTASH_REDIS_REST_URL` y `UPSTASH_REDIS_REST_TOKEN` (o `KV_REST_API_*`).
+   - Conecta **Vercel Blob**: esto inyectará automáticamente `BLOB_READ_WRITE_TOKEN`.
+
+3. **Configurar Variables de Entorno (Environment Variables)**:
+   - `ADMIN_PASSWORD`: contraseña segura para el panel `/admin`.
+   - `SECRET`: cadena secreta larga y aleatoria (ejemplo: un string alfanumérico o hex de 64 caracteres) para firmar cookies y tokens.
+   - `TRUST_PROXY`: valor `1` (para que Express obtenga la IP real del usuario detrás del proxy de Vercel).
+   - `PUBLIC_URL`: la URL pública del despliegue (ejemplo: `https://tu-proyecto.vercel.app`), necesaria para que los links y códigos QR se generen con el dominio correcto.
+
+4. **Desplegar**:
+   - Haz clic en **Deploy**. Al terminar, tu app estará en vivo con persistencia en Redis y fotos en Vercel Blob.
+
 ## Publicarla en internet (opcional)
 
 - **Rápido (desde tu PC):** instala `cloudflared` y ejecuta `cloudflared tunnel --url http://localhost:3000`. Te da un link público mientras tu PC esté encendida.

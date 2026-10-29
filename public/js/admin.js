@@ -176,12 +176,12 @@
   });
   $('#fDesc').addEventListener('input', () => { $('#descCount').textContent = $('#fDesc').value.length; });
 
-  async function compress(file) {
-    if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size < 350 * 1024) return file;
+  async function compress(file, max = 1600, quality = 0.8) {
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) return file;
     try {
       const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
-      const max = 1800;
       const k = Math.min(1, max / Math.max(bmp.width, bmp.height));
+      if (k === 1 && file.size < 350 * 1024 && file.type === 'image/jpeg') return file;
       const c = document.createElement('canvas');
       c.width = Math.round(bmp.width * k);
       c.height = Math.round(bmp.height * k);
@@ -189,7 +189,17 @@
       x.fillStyle = '#0d0412';
       x.fillRect(0, 0, c.width, c.height);
       x.drawImage(bmp, 0, 0, c.width, c.height);
-      const blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', 0.86));
+      let blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', quality));
+      if (blob && blob.size > 3.8 * 1024 * 1024) {
+        // Si aun así se pasa de 3.8 MB, re-comprime más fuerte
+        const c2 = document.createElement('canvas');
+        const k2 = Math.min(1, 1200 / Math.max(c.width, c.height));
+        c2.width = Math.round(c.width * k2);
+        c2.height = Math.round(c.height * k2);
+        const x2 = c2.getContext('2d');
+        x2.drawImage(c, 0, 0, c2.width, c2.height);
+        blob = await new Promise((r) => c2.toBlob(r, 'image/jpeg', 0.7)) || blob;
+      }
       if (!blob || blob.size >= file.size) return file;
       return new File([blob], file.name.replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' });
     } catch {
@@ -232,20 +242,81 @@
     btn.disabled = true;
     btn.textContent = 'Subiendo… 👻';
     try {
-      const fd = new FormData();
-      fd.append('name', $('#fName').value);
-      fd.append('team', $('#fTeam').value);
-      fd.append('description', $('#fDesc').value);
-      const order = [];
-      let n = 0;
+      const name = $('#fName').value;
+      const team = $('#fTeam').value;
+      const description = $('#fDesc').value;
+
+      // Prepara y comprime fotos
+      const preparedSlots = [];
+      let totalNewBytes = 0;
+      let newCount = 0;
       for (const s of filled) {
-        if (s.type === 'keep') order.push('keep:' + s.name);
-        else { order.push('new:' + n++); fd.append('photos', await compress(s.file)); }
+        if (s.type === 'keep') {
+          preparedSlots.push({ type: 'keep', name: s.name });
+        } else {
+          const comp = await compress(s.file, 1600, 0.8);
+          totalNewBytes += comp.size;
+          preparedSlots.push({ type: 'new', file: comp, index: newCount++ });
+        }
       }
-      fd.append('order', JSON.stringify(order));
-      const url = editingId ? '/api/admin/doors/' + editingId : '/api/admin/doors';
-      const r = await api(url, { method: editingId ? 'PUT' : 'POST', body: fd });
-      toast(editingId ? 'Cambios guardados ✔️' : `Puerta "${r.door.name}" creada 🎉`, 'ok');
+
+      // Si el tamaño total de nuevas fotos supera 3.8 MB y hay más de 1 foto nueva,
+      // se suben una por una para no rebasar el límite de 4.5 MB de Vercel.
+      const shouldUploadOneByOne = newCount > 1 && totalNewBytes > 3.8 * 1024 * 1024;
+
+      if (!shouldUploadOneByOne) {
+        const fd = new FormData();
+        fd.append('name', name);
+        fd.append('team', team);
+        fd.append('description', description);
+        const order = [];
+        let n = 0;
+        for (const s of preparedSlots) {
+          if (s.type === 'keep') order.push('keep:' + s.name);
+          else { order.push('new:' + n++); fd.append('photos', s.file); }
+        }
+        fd.append('order', JSON.stringify(order));
+        const url = editingId ? '/api/admin/doors/' + editingId : '/api/admin/doors';
+        const r = await api(url, { method: editingId ? 'PUT' : 'POST', body: fd });
+        toast(editingId ? 'Cambios guardados ✔️' : `Puerta "${r.door.name}" creada 🎉`, 'ok');
+      } else {
+        // Subida secuencial foto por foto
+        let currentDoorId = editingId;
+        const currentKept = preparedSlots.filter((s) => s.type === 'keep').map((s) => s.name);
+        const newItems = preparedSlots.filter((s) => s.type === 'new');
+
+        if (!currentDoorId) {
+          // Crear puerta con la primera foto
+          const first = newItems[0];
+          const fd = new FormData();
+          fd.append('name', name);
+          fd.append('team', team);
+          fd.append('description', description);
+          fd.append('order', JSON.stringify(['new:0']));
+          fd.append('photos', first.file);
+          const r = await api('/api/admin/doors', { method: 'POST', body: fd });
+          currentDoorId = r.door.id;
+          currentKept.push(r.door.files ? r.door.files[0] : (r.door.photos ? r.door.photos[0] : ''));
+          newItems.shift();
+        }
+
+        // Subir las fotos restantes una a una vía PUT
+        for (const item of newItems) {
+          const fd = new FormData();
+          fd.append('name', name);
+          fd.append('team', team);
+          fd.append('description', description);
+          const order = currentKept.map((f) => 'keep:' + f);
+          order.push('new:0');
+          fd.append('order', JSON.stringify(order));
+          fd.append('photos', item.file);
+          const r = await api('/api/admin/doors/' + currentDoorId, { method: 'PUT', body: fd });
+          const newFile = (r.door.files || r.door.photos || []).find((f) => !currentKept.includes(f));
+          if (newFile) currentKept.push(newFile);
+        }
+        toast(editingId ? 'Cambios guardados ✔️' : 'Puerta creada 🎉', 'ok');
+      }
+
       resetForm();
       await load();
     } catch (err) {
