@@ -1,0 +1,15 @@
+{
+  "name": "puertas-de-dia-de-muertos",
+  "version": "1.0.0",
+  "description": "Votación de puertas decoradas de Día de Muertos",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "multer": "^2.0.2",
+    "qrcode": "^1.5.4",
+    "three": "0.170.0"
+  }
+}

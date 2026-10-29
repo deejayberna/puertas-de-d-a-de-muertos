@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resultados · Puertas de Día de Muertos</title>
+<meta name="theme-color" content="#07030b">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💀</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Creepster&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="page-results">
+<canvas id="bg3d" aria-hidden="true"></canvas>
+<div class="fog" aria-hidden="true"></div>
+<canvas id="petals" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+<div class="flash" id="flash" aria-hidden="true"></div>
+<header class="results-head">
+  <p class="hero-kicker">Resultados en vivo</p>
+  <h1 class="title-3d" style="font-size:clamp(2.6rem,7vw,5.6rem)"><span class="t1">Puertas de</span><span class="t2">Día de Muertos</span></h1>
+  <p class="section-sub" style="margin-bottom:30px">Pantalla para proyectar · se actualiza sola cada 5 segundos</p>
+</header>
+<div class="results-grid">
+  <ol class="ranking" id="rankingList"></ol>
+  <aside class="results-side">
+    <div class="big" id="total">0</div>
+    <small style="color:var(--muted);letter-spacing:.15em;text-transform:uppercase">votos totales</small>
+    <div class="qr-main" style="margin-top:22px"><img src="/qr/inicio.png" alt="QR para votar"><small>¡Escanea y vota!</small></div>
+    <p id="state" style="margin-top:16px;font-weight:600"></p>
+    <button class="btn btn-ghost btn-sm" id="fsBtn" type="button" style="margin-top:6px">⛶ Pantalla completa</button>
+  </aside>
+</div>
+<script src="/static/js/common.js"></script>
+<script src="/static/js/ranking.js"></script>
+<script>
+(function () {
+  let prevTotal = null;
+  async function refresh() {
+    try {
+      const r = await PDM.api('/api/doors');
+      PDM.renderRanking(document.getElementById('rankingList'), { doors: r.doors, totalVotes: r.totalVotes, showResults: r.settings.showResults, votedDoorId: null });
+      const t = r.settings.showResults ? r.totalVotes : 0;
+      PDM.animateNumber(document.getElementById('total'), t);
+      if (prevTotal !== null && t > prevTotal) PDM.burst(window.innerWidth / 2, window.innerHeight * 0.3, 60);
+      prevTotal = t;
+      document.getElementById('state').textContent = r.settings.votingOpen ? '🟢 Votación abierta' : '🔴 Votación cerrada';
+    } catch (e) { /* reintenta */ }
+  }
+  refresh();
+  setInterval(refresh, 5000);
+  document.getElementById('fsBtn').addEventListener('click', () => {
+    if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {});
+  });
+})();
+</script>
+<script type="importmap">{ "imports": { "three": "/vendor/three/three.module.min.js" } }</script>
+<script type="module" src="/static/js/scene.js"></script>
+</body>
+</html>

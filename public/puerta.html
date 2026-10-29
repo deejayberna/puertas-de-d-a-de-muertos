@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{{TITLE}} · Puertas de Día de Muertos</title>
+<meta name="description" content="{{DESC}}">
+<meta name="theme-color" content="#07030b">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Puertas de Día de Muertos">
+<meta property="og:title" content="💀 Vota por la puerta: {{TITLE}}">
+<meta property="og:description" content="{{DESC}}">
+<meta property="og:url" content="{{SHARE_URL}}">
+{{OG_IMAGE_TAG}}
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💀</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Creepster&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="page-door" data-door-id="{{DOOR_ID}}" data-share-url="{{SHARE_URL}}">
+<canvas id="bg3d" aria-hidden="true"></canvas>
+<div class="fog" aria-hidden="true"></div>
+<canvas id="petals" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+<div class="flash" id="flash" aria-hidden="true"></div>
+
+<nav class="topnav">
+  <a href="/" class="brand"><span>💀</span> Puertas</a>
+  <div class="links"><a href="/#puertas">Todas las puertas</a><a href="/#ranking">Ranking</a></div>
+  <button id="soundBtn" class="sound-btn" type="button" aria-label="Activar sonido">🔇</button>
+</nav>
+
+<main class="door-page">
+  <a class="back-link" href="/#puertas">← Volver a todas las puertas</a>
+  <div class="door-layout">
+    <div>
+      <div class="carousel-3d" id="carousel">
+        <div class="carousel-track" id="track"></div>
+        <div class="carousel-glow"></div>
+      </div>
+      <div class="carousel-controls" id="carouselControls">
+        <button class="circle-btn" id="prevBtn" type="button" aria-label="Foto anterior">‹</button>
+        <div class="dots" id="dots"></div>
+        <button class="circle-btn" id="nextBtn" type="button" aria-label="Foto siguiente">›</button>
+      </div>
+    </div>
+    <div class="door-detail">
+      <p class="team" id="doorTeam">{{TEAM}}</p>
+      <h1 id="doorName">{{TITLE}}</h1>
+      <div id="rankChip"></div>
+      <p class="desc" id="doorDesc"></p>
+      <div class="vote-zone">
+        <button class="btn btn-blood btn-pulse" id="voteBtn" type="button" disabled>💀 Votar por esta puerta</button>
+        <small id="voteHint">Recuerda: solo tienes 1 voto en total.</small>
+      </div>
+      <p class="share-title">Comparte esta puerta para que voten por ella</p>
+      <div class="share" id="share">
+        <a class="wa" id="shWa" target="_blank" rel="noopener">🟢 WhatsApp</a>
+        <a class="fb" id="shFb" target="_blank" rel="noopener">🔵 Facebook</a>
+        <a class="tg" id="shTg" target="_blank" rel="noopener">✈️ Telegram</a>
+        <a id="shX" target="_blank" rel="noopener">✖️ X</a>
+        <button id="shCopy" type="button">🔗 Copiar link</button>
+      </div>
+      <div class="qr-box">
+        <img id="qrImg" alt="Código QR de esta puerta" loading="lazy">
+        <small>Escanea el QR o imprímelo y pégalo junto a la puerta para que la gente vote desde su celular.</small>
+      </div>
+    </div>
+  </div>
+
+  <section class="others" id="othersWrap" hidden>
+    <h2 class="section-title" style="font-size:clamp(2rem,5vw,3rem)">Otras puertas</h2>
+    <p class="section-sub">Antes de decidir, échales un ojo a las demás…</p>
+    <div class="others-grid" id="others"></div>
+  </section>
+</main>
+
+<footer>Puertas de Día de Muertos 2026 · <a href="/">Ir a la página principal</a></footer>
+
+<script src="/static/js/common.js"></script>
+<script src="/static/js/puerta.js"></script>
+<script type="importmap">{ "imports": { "three": "/vendor/three/three.module.min.js" } }</script>
+<script type="module" src="/static/js/scene.js"></script>
+</body>
+</html>

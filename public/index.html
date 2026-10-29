@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Puertas de Día de Muertos</title>
+<meta name="description" content="Vota por tu puerta favorita de Día de Muertos. Solo tienes un voto: ¡elige bien!">
+<meta name="theme-color" content="#07030b">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Puertas de Día de Muertos">
+<meta property="og:title" content="Puertas de Día de Muertos 💀">
+<meta property="og:description" content="Los equipos decoraron sus puertas para recibir a las ánimas. Vota por tu favorita: solo tienes 1 voto.">
+<meta property="og:url" content="{{OG_URL}}">
+{{OG_IMAGE_TAG}}
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💀</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Creepster&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="page-home">
+<canvas id="bg3d" aria-hidden="true"></canvas>
+<div class="fog" aria-hidden="true"></div><div class="fog fog-2" aria-hidden="true"></div>
+<canvas id="petals" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+<div class="flash" id="flash" aria-hidden="true"></div>
+
+<!-- Intro: las puertas se abren -->
+<div id="intro" class="intro">
+  <div class="intro-door left"><div class="panel"></div><div class="panel"></div><div class="knocker">💀</div></div>
+  <div class="intro-door right"><div class="panel"></div><div class="panel"></div><div class="knocker">💀</div></div>
+  <div class="intro-content">
+    <p class="intro-whisper">Las ánimas te esperan del otro lado…</p>
+    <h2 class="intro-title">¿Te atreves a cruzar?</h2>
+    <button id="enterBtn" class="btn btn-blood btn-pulse" type="button">🕯️ Entrar si te atreves</button>
+    <p class="hint" style="margin-top:1rem;font-size:.8rem;color:#bba9bb">Con sonido ambiental · puedes silenciarlo arriba a la derecha</p>
+  </div>
+</div>
+
+<nav class="topnav">
+  <a href="/" class="brand"><span>💀</span> Puertas</a>
+  <div class="links"><a href="#puertas">Puertas</a><a href="#ranking">Ranking</a><a href="#gracias">Gracias</a></div>
+  <button id="soundBtn" class="sound-btn" type="button" aria-label="Activar sonido">🔇</button>
+</nav>
+
+<header class="hero">
+  <div class="papel-picado" id="papelPicado" aria-hidden="true"></div>
+  <div class="hero-inner">
+    <p class="hero-kicker">Concurso de puertas · Día de Muertos 2026</p>
+    <h1 class="title-3d" id="title3d"><span class="t1">Puertas de</span><span class="t2">Día de Muertos</span></h1>
+    <div class="drips" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <p class="hero-desc">Cada equipo decoró su puerta para abrirle el camino a las almas que regresan esta noche. Recórrelas todas y <strong>vota por tu puerta favorita</strong>. Pero cuidado: <strong>solo tienes un voto</strong> y no hay vuelta atrás… así que elige bien.</p>
+    <div class="hero-stats">
+      <div class="stat"><span id="statDoors">0</span><small>puertas</small></div>
+      <div class="stat" id="statVotesWrap"><span id="statVotes">0</span><small>votos</small></div>
+      <div class="stat" id="countdownWrap" hidden><span id="countdown">--</span><small>para cerrar</small></div>
+    </div>
+    <div class="vote-status" id="voteStatus"></div>
+    <a href="#puertas" class="btn btn-ghost scroll-cue">Ver las puertas ↓</a>
+  </div>
+</header>
+
+<main>
+  <section id="puertas" class="section">
+    <h2 class="section-title">Las Puertas</h2>
+    <p class="section-sub">Pasa el cursor (o toca) cada puerta para abrirla y descubrir lo que esconde. Entra a "Ver puerta" para ver sus 3 fotos.</p>
+    <div class="doors-grid" id="doorsGrid"><div class="loading">Invocando a las ánimas…</div></div>
+  </section>
+
+  <section id="ranking" class="section">
+    <h2 class="section-title">Tabla de las Ánimas</h2>
+    <p class="section-sub">Así va la votación: de la puerta con más votos a la de menos. Se actualiza sola cada pocos segundos.</p>
+    <ol class="ranking" id="rankingList"></ol>
+  </section>
+
+  <section id="gracias" class="section thanks">
+    <div class="thanks-card">
+      <div class="candles" aria-hidden="true"><span>🕯️</span><span>🌼</span><span>💀</span><span>🌼</span><span>🕯️</span></div>
+      <h2 class="section-title">¡Gracias por participar!</h2>
+      <p>A todos los equipos que pusieron su creatividad, su tiempo y su corazón en cada puerta, y a ti por recorrerlas y dar tu voto. Gracias por mantener viva una de nuestras tradiciones más bonitas: recordar a quienes ya partieron con flores, color y alegría.</p>
+      <p class="thanks-quote">"Mientras haya quien nos recuerde, el camino de cempasúchil seguirá encendido."</p>
+      <p id="thanksVote" hidden></p>
+      <div class="thanks-actions">
+        <button class="btn btn-marigold" id="shareMain" type="button">📲 Compartir la votación</button>
+        <a class="btn btn-ghost" href="#puertas">Volver a las puertas</a>
+      </div>
+      <div class="qr-main"><img src="/qr/inicio.png" alt="Código QR para entrar a la votación" loading="lazy"><small>Escanea para votar</small></div>
+    </div>
+  </section>
+</main>
+
+<footer>Hecho con 🧡 y cempasúchil · Puertas de Día de Muertos 2026 · <a href="/resultados">Pantalla de resultados</a></footer>
+
+<script src="/static/js/common.js"></script>
+<script src="/static/js/ranking.js"></script>
+<script src="/static/js/home.js"></script>
+<script type="importmap">{ "imports": { "three": "/vendor/three/three.module.min.js" } }</script>
+<script type="module" src="/static/js/scene.js"></script>
+</body>
+</html>
