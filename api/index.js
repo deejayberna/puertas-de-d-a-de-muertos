@@ -1,5 +1,2 @@
 'use strict';
-const { app } = require('../app');
-
-module.exports = app;
-
+module.exports = require('../app');

@@ -596,10 +596,11 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Algo salió mal en el más allá. Intenta de nuevo.' });
 });
 
-module.exports = {
-  app,
-  PORT,
-  DEFAULT_PASSWORD,
-  ADMIN_PASSWORD
-};
+// Vercel exige que la exportación principal sea la app (función).
+// Se agregan propiedades para que server.js y api/index.js sigan funcionando.
+app.app = app;
+app.PORT = PORT;
+app.DEFAULT_PASSWORD = DEFAULT_PASSWORD;
+app.ADMIN_PASSWORD = ADMIN_PASSWORD;
+module.exports = app;
 
